@@ -1,5 +1,4 @@
 import Calorie from "./model.js";
-import { verifyToken } from "../utils/authService.js";
 
 const ACTIVITY_FACTOR = {
   sedentary: 1.2,
@@ -132,12 +131,8 @@ function getDefineMuscle(calories) {
 }
 
 export const createCalories = async (req, res) => {
+  console.log(req.body)
   const { gender, weight, height, age, activityFactor, objectives } = req.body;
-  const authHeader = req.header("Authorization");
-
-  if (authHeader) {
-    const token = authHeader.replace("Bearer ", "");
-    const decoded = await verifyToken(token);
     if (gender && weight && height && age && activityFactor && objectives) {
       const calorie = new Calorie({
         gender: gender,
@@ -146,7 +141,7 @@ export const createCalories = async (req, res) => {
         age: age,
         activityFactor: activityFactor,
         objectives: objectives,
-        userId: decoded.id,
+        userId: req.body.userId.toString(),
       });
 
       try {
@@ -158,22 +153,14 @@ export const createCalories = async (req, res) => {
     } else {
       res.status(400).json({ result: "Falta parámetros en las calorías" });
     }
-  } else {
-    res.status(401).json({ message: "Access denied" });
-  }
 };
 
 export const getCaloriesByUser = async (req, res) => {
   try {
-    const authHeader = req.header("Authorization");
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const decoded = await verifyToken(token);
-      const caloriesUser = await Calorie.findOne({ userId: decoded.id });
+      const caloriesUser = await Calorie.find({ userId: req.body.userId });
       res.send({
         caloriesUser: caloriesUser,
-      });
-    }
+      })
   } catch (error) {
     res.json({ error: error });
   }

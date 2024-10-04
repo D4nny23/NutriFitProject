@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { calories, createCalories, getCaloriesByUser } from "./controller.js";
+import { jwtValidation } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
@@ -9,8 +10,8 @@ const caloriesRouter = (app) => {
   });
 
   router.post("/", calories);
-  router.post("/createCalories", createCalories);
-  router.get("/caloriesByUser", getCaloriesByUser);
+  router.post("/createCalories", jwtValidation, createCalories);
+  router.get("/caloriesByUser", jwtValidation, getCaloriesByUser);
 
 
   app.use("/calories", router);
